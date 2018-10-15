@@ -25,10 +25,11 @@ const {
   articleHeaderImageUrl,
   prefixUrl,
 } = require('./layout')
-const { stripTags } = require('../../universal-utils')
+const { stripTags, topicName } = require('../../universal-utils')
 const EmbeddedResource = require('./EmbeddedResource')
 const Html = require('./Html')
 const Summaries = require('./Summaries')
+const { LangLink } = require('./LangSelector')
 
 // subcomponents
 
@@ -195,15 +196,24 @@ const ArticleHeader = injectIntl(({ article, resources, intl, options }) => {
   ])
 })
 
-const ArticleBreadcrumb = ({ article, topics, options }) => {
+const ArticleBreadcrumb = ({ article, topics, options, intl }) => {
   const topic = topics.find(x => x.id === article.topic)
+  const otherLang = intl.lang === 'fr' ? 'en' : 'fr'
+  const otherUrl = intl.urls[otherLang]
   return h('section.ArticleBreadcrumb', [
     h('.container', [
       h(
-        'a',
+        'a.TopicLink',
         { href: getTopicPageUrl(topic, options) },
-        topic ? `${topic.id}. ${topic.name}` : article.topic,
+        topic ? `${topic.id}. ${topicName(topic, intl.lang)}` : article.topic,
       ),
+      otherUrl &&
+        h(LangLink, {
+          intl,
+          lang: otherLang,
+          url: otherUrl,
+          label: `common.article-version-lang.${otherLang}`,
+        }),
     ]),
   ])
 }
@@ -357,7 +367,7 @@ const ArticlePrevNextInline = ({ prevNext: { prev, next }, options }) => {
           }),
           h('div', [
             h('.ArticlePrevNextTopicInline', prev.topicName),
-            h('.ArticlePrevNextTitleInline', prev.title),
+            h('.ArticlePrevNextTitleInline', stripTags(prev.title)),
           ]),
         ]),
       ]),
@@ -366,7 +376,7 @@ const ArticlePrevNextInline = ({ prevNext: { prev, next }, options }) => {
         h('a.ArticleNextInline', { href: getResourcePageUrl(next, options) }, [
           h('div', [
             h('.ArticlePrevNextTopicInline', next.topicName),
-            h('.ArticlePrevNextTitleInline', next.title),
+            h('.ArticlePrevNextTitleInline', stripTags(next.title)),
           ]),
           h('img', {
             alt: '',
@@ -436,6 +446,7 @@ const ArticlePage = injectIntl((
         resources,
         lexiconId,
         options,
+        intl,
       }),
       h(ArticlePrevNext, { prevNext, options }),
     ]),

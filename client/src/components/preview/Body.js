@@ -14,6 +14,7 @@ module.exports = (
     altTitle,
     options,
     children,
+    scripts = [],
   } /*: {
   topics: Topic[],
   logoColor: 'black' | 'white',
@@ -36,13 +37,13 @@ module.exports = (
       src: prefixUrl('/assets/js/fitie.js', options.preview),
     }),
     h('script', {
-      src: `${CDN}/jquery/3.3.1/jquery.min.js`,
+      src: `${CDN}/jquery/3.3.1/jquery.slim.min.js`,
     }),
     h('script', {
-      src: `${CDN}/lodash.js/4.17.5/lodash.min.js`,
+      src: prefixUrl('/assets/js/lodash.custom.min.js', options.preview),
     }),
     h('script', {
-      src: `${CDN}/twitter-bootstrap/3.3.7/js/bootstrap.min.js`,
+      src: prefixUrl('/assets/js/bootstrap.custom.min.js', options.preview),
     }),
     h('script', {
       src: `${CDN}/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js`,
@@ -50,9 +51,7 @@ module.exports = (
     h('script', {
       src: `${CDN}/picturefill/3.0.3/picturefill.min.js`,
     }),
-    h('script', {
-      src: `${CDN}/selectize.js/0.12.6/js/standalone/selectize.min.js`,
-    }),
+    ...scripts.map(src => h('script', { src })),
     h('script', {
       src: prefixUrl('/assets/js/eatlas.es5.js', options.preview),
     }),

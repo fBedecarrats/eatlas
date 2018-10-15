@@ -15,6 +15,7 @@ const {
   getMediaPreviewUrl,
   getResourcePagePreviewUrl,
   LOCALES,
+  topicName,
 } = require('../../client/src/universal-utils')
 const { pathToUrl, pagePath, resourceMediaPath } = require('./resource-path')
 const {
@@ -175,7 +176,7 @@ const getImageStats = async (resource, found, { preview = false } = {}) => {
   }
 }
 
-const smallestImageKey = images => {
+const smallestImageKey = (exports.smallestImageKey = images => {
   if (images) {
     for (let size of ['small', 'medium', 'large']) {
       if (images[size]) {
@@ -188,15 +189,7 @@ const smallestImageKey = images => {
     }
   }
   return null
-}
-
-exports.smallestImage = images => {
-  const found = smallestImageKey(images)
-  if (!found) {
-    return null
-  }
-  return images[found.size][found.density]
-}
+})
 
 const getThumbnailUrl = (resources, { preview }) => resource => {
   if (!resource) {
@@ -361,7 +354,7 @@ exports.getAllUrls = async options => {
         info: `fo.type-label.${r.type}`,
       },
     ])
-    addPage(topic.name, 'topic', {
+    addPage(topicName(topic, options.lang), 'topic', {
       resource: topic,
       children,
       info: 'fo.type-label.topic',
@@ -370,27 +363,27 @@ exports.getAllUrls = async options => {
   return urls
 }
 
-exports.getOtherLangUrl = async ({
-  page,
-  resource,
-  topic,
-  topics,
-  preview,
-  lang,
-}) => {
-  const otherLang = (resource ? resource.language : lang) === 'fr' ? 'en' : 'fr'
+exports.getUrl = async ({ page, resource, topic, topics, preview, lang }) => {
   if (resource) {
     // Resource page: find translated resource using ID convention
     // XXXX-EN → XXXX-FR or XXXX)
     // XXXX-FR → XXXX-EN
     // XXXX    → XXXX-EN
     const idPrefix = resource.id.replace(RE_ID_LANG_SUFFIX, '')
-    let otherResource = await Resources.findById(
-      `${idPrefix}-${otherLang.toUpperCase()}`,
-    )
-    if (!otherResource && otherLang === 'fr') {
-      // Look for unprefixed resource as default language = 'fr'
-      otherResource = await Resources.findById(idPrefix)
+    const otherId = `${idPrefix}-${lang.toUpperCase()}`
+    let otherResource
+    if (
+      resource.id === otherId ||
+      (resource.id === idPrefix && lang === 'fr')
+    ) {
+      // Already the good resource
+      otherResource = resource
+    } else {
+      otherResource = await Resources.findById(otherId)
+      if (!otherResource && lang === 'fr') {
+        // Look for unprefixed resource as default language = 'fr'
+        otherResource = await Resources.findById(idPrefix)
+      }
     }
     if (!otherResource) {
       return null
@@ -398,25 +391,21 @@ exports.getOtherLangUrl = async ({
     // Clone resource before computing pageUrl, to avoid conflict with pre-computed one
     let localeResource = Object.assign({}, otherResource)
     delete localeResource.pageUrl
-    exports.populatePageUrl(null, topics, { preview, lang: otherLang })(
-      localeResource,
-    )
+    exports.populatePageUrl(null, topics, { preview, lang })(localeResource)
     return getResourcePageUrl(localeResource, { preview })
   }
   if (topic) {
     // Clone resource before computing pageUrl, to avoid conflict with pre-computed one
     let localeTopic = Object.assign({}, topic)
     delete localeTopic.pageUrl
-    exports.populatePageUrl('topic', topics, { preview, lang: otherLang })(
-      localeTopic,
-    )
-    return getTopicPageUrl(localeTopic, { preview, apiUrl, lang: otherLang })
+    exports.populatePageUrl('topic', topics, { preview, lang })(localeTopic)
+    return getTopicPageUrl(localeTopic, { preview, apiUrl, lang })
   }
   if (page) {
     // Global page
     return globalPageUrl(page, null, null)({
       preview,
-      lang: otherLang,
+      lang,
       apiUrl,
       publicUrl: config.publicUrl,
     })

@@ -46,5 +46,25 @@
     "video": "vidéo",
     "topic": "rubrique"
   },
-  "current-lang-link-title": "La page courante est déjà en français"
+  "current-lang-link-title": "La page courante est déjà en français",
+  "page-description": {
+    "index": "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 200 cartes et graphiques portant sur les grands enjeux actuels",
+    "definition": "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 240 définitions portant sur les grands enjeux actuels",
+    "search":
+      "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 200 cartes et graphiques portant sur les grands enjeux actuels",
+    "about": "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 200 cartes et graphiques portant sur les grands enjeux actuels",
+    "legals": "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 200 cartes et graphiques portant sur les grands enjeux actuels",
+    "sitemap": "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 200 cartes et graphiques portant sur les grands enjeux actuels",
+    "notFound": "Atlas en libre accès made in Sciences Po. Espace mondial : l'Atlas regroupe plus de 200 cartes et graphiques portant sur les grands enjeux actuels"
+  },
+  "page-image": {
+    "index": "/assets/img/page-image/social.png",
+    "definition": "/assets/img/page-image/social.png",
+    "search": "/assets/img/page-image/social.png",
+    "about": "/assets/img/page-image/social.png",
+    "legals": "/assets/img/page-image/social.png",
+    "sitemap": "/assets/img/page-image/social.png",
+    "notFound": "/assets/img/page-image/social.png",
+    "topic": "/assets/img/page-image/social.png"
+  }
 }

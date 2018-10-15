@@ -7,7 +7,8 @@
 const h = require('react-hyperscript')
 const { FormattedMessage: T, injectIntl } = require('react-intl')
 
-const { prefixUrl } = require('./layout')
+const { CDN, prefixUrl } = require('./layout')
+const { LOCALES, topicName } = require('../../universal-utils')
 const Head = require('./Head')
 const Body = require('./Body')
 const Html = require('./Html')
@@ -29,8 +30,20 @@ results = {
 }
 */
 
-const hitTextTemplate = () => `
+const hitTextTemplate = (t, lang) => `
   <strong class="search-result-title"><%= hit.title %></strong>
+  <% if (hit.language && hit.language !== ${JSON.stringify(lang)}) { %>
+    ${Object.keys(LOCALES)
+      .map(
+        l =>
+          `<% if (hit.language === ${JSON.stringify(l)}) { %>${t(
+            `common.search-lang-indicator-html.${l}`,
+            {},
+            '',
+          )}<% } %>`,
+      )
+      .join('')}
+  <% } %>
   <% if (hit.subtitle) { %>
     <span class="search-result-subtitle"><%= hit.subtitle %></span>
   <% } %>
@@ -116,9 +129,9 @@ const paginationTemplate = t => `
 </div>
 `
 
-const resultsTemplate = t => `
+const resultsTemplate = (t, lang) => `
 ${paginationTemplate(t)}
-<% _.forEach(results.hits, function (hit) { %>
+<% for (var i=0;i<results.hits.length;i++) { var hit=results.hits[i]; %>
   <% if (hit.url) { %>
     <a class="row search-result" href="<%= hit.url %>" <% if (hit.type === 'reference') { %>target="_blank"<% } %>>
   <% } else { %>
@@ -132,11 +145,11 @@ ${paginationTemplate(t)}
         ${hitPreviewTemplate(t)}
       </div>
       <div class="search-result-text col-sm-9">
-        ${hitTextTemplate(t)}
+        ${hitTextTemplate(t, lang)}
       </div>
     <% } else { %>
       <div class="search-result-text col-sm-12">
-        ${hitTextTemplate(t)}
+        ${hitTextTemplate(t, lang)}
       </div>
     <% } %>
   <% if (hit.url) { %>
@@ -144,7 +157,7 @@ ${paginationTemplate(t)}
   <% } else { %>
     </div>
   <% } %>
-<% }) %>
+<% } %>
 `
 
 const filtersToggle = (title, inputs, hidden = false) => {
@@ -192,7 +205,7 @@ const SearchFilters = ({ topics, types, locales, keywords, intl }) =>
               key: 'input',
               value: topic.id,
             }),
-            topic.name,
+            topicName(topic, intl.lang),
           ]),
         ]),
       ),
@@ -312,8 +325,10 @@ const Search = ({ topics, types, locales, keywords, options, intl }) =>
         whitelist: 'all',
         noP: true,
       },
-      resultsTemplate((id, values = {}) =>
-        intl.formatMessage({ id: `fo.search.${id}` }, values),
+      resultsTemplate(
+        (id, values = {}, prefix = 'fo.search.') =>
+          intl.formatMessage({ id: `${prefix}${id}` }, values),
+        intl.lang,
       ),
     ),
     h('section.SearchResults.container', {}, [
@@ -339,28 +354,42 @@ const SearchPage = injectIntl((
 } */,
 ) =>
   h('html', { lang: intl.lang }, [
-    h(Head, { title: intl.formatMessage({ id: 'fo.search.title' }), options }),
-    h(Body, { topics, options, logoColor: 'black' }, [
-      h(Search, { topics, types, locales, keywords, options, intl }),
-      h(
-        Html,
-        {
-          component: 'script',
-          whitelist: 'all',
-          noP: true,
-        },
-        `window.SEARCH_PAGE_TITLE=${JSON.stringify({
-          article: intl.formatMessage({ id: 'doc.type-plural.article' }),
-          focus: intl.formatMessage({ id: 'doc.type-plural.focus' }),
-          map: intl.formatMessage({ id: 'doc.type-plural.map' }),
-          image: intl.formatMessage({ id: 'doc.type-plural.image+video' }),
-          video: intl.formatMessage({ id: 'doc.type-plural.image+video' }),
-          'single-definition': intl.formatMessage({
-            id: 'doc.type-plural.definition',
-          }),
-          definition: intl.formatMessage({ id: 'doc.type-plural.definition' }),
-          reference: intl.formatMessage({ id: 'doc.type-plural.reference' }),
-        })};
+    h(Head, {
+      title: intl.formatMessage({ id: 'fo.search.title' }),
+      options,
+      styles: [`${CDN}/selectize.js/0.12.6/css/selectize.default.min.css`],
+    }),
+    h(
+      Body,
+      {
+        topics,
+        options,
+        logoColor: 'black',
+        scripts: [`${CDN}/selectize.js/0.12.6/js/standalone/selectize.min.js`],
+      },
+      [
+        h(Search, { topics, types, locales, keywords, options, intl }),
+        h(
+          Html,
+          {
+            component: 'script',
+            whitelist: 'all',
+            noP: true,
+          },
+          `window.SEARCH_PAGE_TITLE=${JSON.stringify({
+            article: intl.formatMessage({ id: 'doc.type-plural.article' }),
+            focus: intl.formatMessage({ id: 'doc.type-plural.focus' }),
+            map: intl.formatMessage({ id: 'doc.type-plural.map' }),
+            image: intl.formatMessage({ id: 'doc.type-plural.image+video' }),
+            video: intl.formatMessage({ id: 'doc.type-plural.image+video' }),
+            'single-definition': intl.formatMessage({
+              id: 'doc.type-plural.definition',
+            }),
+            definition: intl.formatMessage({
+              id: 'doc.type-plural.definition',
+            }),
+            reference: intl.formatMessage({ id: 'doc.type-plural.reference' }),
+          })};
         window.TYPE_LABEL=${JSON.stringify(
           Object.keys(types).reduce(
             (dict, type) =>
@@ -370,8 +399,9 @@ const SearchPage = injectIntl((
             {},
           ),
         )};`,
-      ),
-    ]),
+        ),
+      ],
+    ),
   ]),
 )
 

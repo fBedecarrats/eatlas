@@ -1,5 +1,5 @@
 {
-  "title": "Global space: the Atlas",
+  "title": "World Atlas of Global Issues",
   "close": "Close",
   "nav-summary": "Summary",
   "nav-resources": "Resources",
@@ -45,5 +45,25 @@
     "video": "video",
     "topic": "topic"
   },
-  "current-lang-link-title": "Current page is already in English"
+  "current-lang-link-title": "Current page is already in English",
+  "page-description": {
+    "index": "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 maps and graphics",
+    "definition": "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 definitions",
+    "search":
+      "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 maps and graphics",
+    "about": "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 maps and graphics",
+    "legals": "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 maps and graphics",
+    "sitemap": "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 maps and graphics",
+    "notFound": "Atlas in open acess made in Sciences Po. World Atlas of Global Issues regroup more than 200 maps and graphics"
+  },
+  "page-image": {
+    "index": "/assets/img/page-image/social.png",
+    "definition": "/assets/img/page-image/social.png",
+    "search": "/assets/img/page-image/social.png",
+    "about": "/assets/img/page-image/social.png",
+    "legals": "/assets/img/page-image/social.png",
+    "sitemap": "/assets/img/page-image/social.png",
+    "notFound": "/assets/img/page-image/social.png",
+    "topic": "/assets/img/page-image/social.png"
+  }
 }
