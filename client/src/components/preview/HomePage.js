@@ -9,44 +9,43 @@ const { FormattedMessage: T, injectIntl } = require('react-intl')
 
 const {
   prefixUrl,
-  getSearchUrl,
   getTopicPageUrl,
-  globalPageUrl,
+  CDN,
+  getImageUrl,
+  getResourcePageUrl,
 } = require('./layout')
-const { slugify } = require('../../universal-utils')
+const { slugify, topicName, stripTags } = require('../../universal-utils')
 const Head = require('./Head')
 const Body = require('./Body')
 const Html = require('./Html')
 
 // subcomponents
-const featuresUrl = features =>
-  `/assets/img/features/features-${features}.svg`
+const featuresUrl = features => `/assets/img/features/features-${features}.svg`
 
 const featuresList = injectIntl(({ features, options, intl }) => {
   return h('li.col-sm-4.col-xs-6.FeaturesList', [
-      h('img', {
-        src: prefixUrl(featuresUrl(features), options.preview),
-        alt: `features-picto`,
-      }),
-      h('div', [
-        h('.FeaturesTitle', {}, h(Html, {}, intl.formatMessage({ id: `home.features.${features}` }))),
-      ]),
-    ],
-  )
+    h('img', {
+      src: prefixUrl(featuresUrl(features), options.preview),
+      alt: `features-picto`,
+    }),
+    h('div', [
+      h(
+        '.FeaturesTitle',
+        {},
+        h(Html, {}, intl.formatMessage({ id: `home.features.${features}` })),
+      ),
+    ]),
+  ])
 })
 
-const featuresNum = [
-  '0', '1', '2', '3', '4'
-]
+const featuresNum = ['0', '1', '2', '3', '4']
 
 const Features = ({ options, intl }) => {
-  return  h('section.HomeFeatures#features', [
+  return h('section.HomeFeatures#features', [
     h('.container', [
       h(
         'ul',
-        featuresNum.map(features =>
-          h(featuresList, { features, options }),
-        ),
+        featuresNum.map(features => h(featuresList, { features, options })),
       ),
     ]),
   ])
@@ -230,7 +229,118 @@ const Team = ({ options, intl }) => {
   ])
 }
 
-const Home = ({ topics, options, intl }) => {
+const carouselSettings = nbArticles => (
+  slides,
+  centerPadding = '50px',
+  breakpoint = null,
+  additionalSettings = {},
+) => {
+  const settings = {
+    slidesToShow: Math.min(nbArticles, slides),
+    centerPadding,
+    initialSlide:
+      nbArticles > slides
+        ? Math.floor(Math.random() * (nbArticles - 1)) // Do not start with last slide as it breaks initial display
+        : 0, // Not enough articles: set to 0 or we'll have ugly offset
+    ...additionalSettings,
+  }
+  return breakpoint ? { breakpoint, settings } : settings
+}
+
+const TopicCarousel = ({
+  topic,
+  articles,
+  options,
+  intl,
+  lazyLoading = true,
+}) => {
+  const settings = carouselSettings(articles.length)
+  if (articles.length === 0) {
+    return null
+  }
+  return h(
+    `.TopicCarousel.carousel`,
+    {
+      'data-slick': JSON.stringify({
+        dots: true,
+        arrows: true,
+        infinite: true,
+        centerMode: true,
+        ...settings(2, '60px'),
+        responsive: [
+          settings(2, '40px', 768, { arrows: false }),
+          settings(1, '40px', 600, { arrows: false }),
+        ],
+      }),
+    },
+    articles.map(a =>
+      h(
+        `.TopicCarouselItem.carousel-item`,
+        { key: a.id },
+        h(
+          'a',
+          {
+            href: getResourcePageUrl(a, options),
+          },
+          [
+            a.carouselImage
+              ? h(
+                  '.image',
+                  lazyLoading
+                    ? {
+                        'data-lazy-background-image': getImageUrl(
+                          a.carouselImage.resource,
+                          a.carouselImage.size,
+                          a.carouselImage.density,
+                          options,
+                        ),
+                      }
+                    : {
+                        style: {
+                          backgroundImage: `url(${getImageUrl(
+                            a.carouselImage.resource,
+                            a.carouselImage.size,
+                            a.carouselImage.density,
+                            options,
+                          )})`,
+                        },
+                      },
+                )
+              : null,
+            h('.caption', stripTags(a.title)),
+          ],
+        ),
+      ),
+    ),
+  )
+}
+
+const Topics = ({ topics, articles, options, intl }) =>
+  h(
+    'section.HomeTopics',
+    topics.slice(1).map(t =>
+      h('.HomeTopic.container', { key: t.id }, [
+        h(
+          'h2',
+          {},
+          h(
+            'a',
+            { href: getTopicPageUrl(t, options) },
+            `${t.id}. ${topicName(t, intl.lang)}`,
+          ),
+        ),
+        h(TopicCarousel, {
+          topic: t,
+          articles: articles.filter(a => a.topic === t.id),
+          options,
+          intl,
+          key: t.id,
+        }),
+      ]),
+    ),
+  )
+
+const Home = ({ topics, articles, options, intl }) => {
   return h('article.HomePage', [
     h('.HomeVideo', {}, [
       h(
@@ -253,24 +363,7 @@ const Home = ({ topics, options, intl }) => {
       h('h1.HomeTitle', {}, h(T, { id: 'home.title' })),
       h('h1.HomeTitle.HomeTitleTyped', {}, h(T, { id: 'home.subtitle' })),
     ]),
-    h('section.HomeTopics', [
-      h('.container', [
-        h('h2', {}, h(T, { id: 'home.topics-title' })),
-        h(
-          '.row.gutter',
-          topics
-            .slice(1)
-            .map(t =>
-              h('.col-xs-6.col-sm-4', { key: t.id }, [
-                h('a.HomeTopic', { href: getTopicPageUrl(t, options) }, [
-                  h('.TopicNumber', t.id),
-                  h('.TopicName', t.name),
-                ]),
-              ]),
-            ),
-        ),
-      ]),
-    ]),
+    h(Topics, { topics, articles, options, intl }),
     h(Features, { options }),
     // h('section.HomeProject', [
     //   h('.container', [
@@ -284,9 +377,7 @@ const Home = ({ topics, options, intl }) => {
     h('section.HomeContact#contact', [
       h('.container', [
         h('h2', {}, h(T, { id: 'home.contact-title' })),
-        h('div', [
-          h(T, { id: 'home.contact-intro' }),
-        ]),
+        h('div', [h(T, { id: 'home.contact-intro' })]),
         h('div', [
           h(
             'a.button.btn',
@@ -338,6 +429,7 @@ const Home = ({ topics, options, intl }) => {
 const HomePage = injectIntl((
   {
     topics,
+    articles,
     options,
     intl,
   } /*: {
@@ -347,10 +439,21 @@ const HomePage = injectIntl((
 } */,
 ) =>
   h('html', { lang: intl.lang }, [
-    h(Head, { title: intl.formatMessage({ id: 'home.title-meta' }), options }),
-    h(Body, { topics, options, logoColor: 'white' }, [
-      h(Home, { topics, options, intl }),
-    ]),
+    h(Head, {
+      title: intl.formatMessage({ id: 'home.title-meta' }),
+      options,
+      styles: [`${CDN}/slick-carousel/1.9.0/slick.css`],
+    }),
+    h(
+      Body,
+      {
+        topics,
+        options,
+        logoColor: 'white',
+        scripts: [`${CDN}/slick-carousel/1.9.0/slick.min.js`],
+      },
+      [h(Home, { topics, articles, options, intl })],
+    ),
   ]),
 )
 

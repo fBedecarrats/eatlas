@@ -8,6 +8,66 @@
   $('.consultedAt').text(`${d}/${m}/${y}`)
   $('.articleUrl').text(document.location)
 
+  // Initialize Slick Carousel
+  if ($.fn.slick) {
+    const loadLazyImages = (slick, index = slick.currentSlide) => {
+      const start =
+        slick.$slides.length <= slick.options.slidesToShow
+          ? 0 // All visible, start at 0, no special case
+          : slick.options.centerMode // Center mode, we have negative indices
+            ? index - Math.floor(slick.options.slidesToShow / 2)
+            : index
+      for (let i = start; i < start + slick.options.slidesToShow; i++) {
+        const $slide = slick.$slides.filter(`[data-slick-index=${i}]`)
+        loadLazyImage($slide)
+      }
+    }
+    const loadLazyImage = $slide => {
+      const attr = 'data-lazy-background-image'
+      const $image = $(`.image[${attr}]`, $slide)
+      $image.each(function() {
+        const src = this.getAttribute(attr)
+        this.style.backgroundImage = `url(${src})`
+      })
+    }
+    $(() => {
+      $('.carousel')
+        .on('afterChange', (e, slick, prev, next) =>
+          loadLazyImages(slick, next),
+        )
+        .on('init', (e, slick) => loadLazyImages(slick))
+        .slick({
+          // accessibility: true,
+          // adaptiveHeight: false,
+          // autoplay: false,
+          // autoplaySpeed: 3000,
+          // arrows: true,
+          prevArrow: '<div class="slick-prev">Previous</div>',
+          nextArrow: '<div class="slick-next">Next</div>',
+          // centerMode: false,
+          // centerPadding: '50px',
+          // cssEase: 'ease',
+          dots: true,
+          // draggable: true,
+          fade: false,
+          // infinite: true,
+          // initialSlide: 0,
+          // lazyLoad: 'ondemand',
+          // mobileFirst: false,
+          // responsive: null,
+          // rows: 1,
+          // slidesPerRow: 1,
+          // slide: '',
+          slidesToShow: 1,
+          // slidesToScroll: 1,
+          // speed: 300,
+          // swipe: true,
+          // variableWidth: false,
+          // zIndex: 1000,
+        })
+    })
+  }
+
   const goToSearch = evt => {
     if (evt.which !== 13) return // enter
     const $this = $(evt.currentTarget)
