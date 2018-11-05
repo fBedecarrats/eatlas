@@ -204,7 +204,8 @@ const Team = ({ options, intl }) => {
           h(TeamMember, { key: member.key, member, options }),
         ),
       ),
-      h('h3', {}, h(T, { id: 'home.the-vizualisations' })),
+      h('h3.viz', {}, h(T, { id: 'home.the-vizualisations' })),
+      h('h3', {}, h(T, { id: 'home.the-vizualisations-creator' })),
       h(
         'ul',
         cartographers.map(member =>
@@ -252,7 +253,7 @@ const TopicCarousel = ({
   articles,
   options,
   intl,
-  lazyLoading = true,
+  lazyLoading = false,
 }) => {
   const settings = carouselSettings(articles.length)
   if (articles.length === 0) {
@@ -265,11 +266,10 @@ const TopicCarousel = ({
         dots: true,
         arrows: true,
         infinite: true,
-        centerMode: true,
-        ...settings(2, '60px'),
+        ...settings(2, ''),
         responsive: [
           settings(2, '40px', 768, { arrows: false }),
-          settings(1, '40px', 600, { arrows: false }),
+          settings(1, '40px', 600, { arrows: false, centerMode: true }),
         ],
       }),
     },

@@ -6,7 +6,9 @@
   "the-team": "L’équipe",
   "the-texts": "Les textes",
   "the-vizualisations":
-    "Les visualisations (Sciences Po - Atelier de cartographie)",
+    "Les visualisations",
+  "the-vizualisations-creator":
+    "(Sciences Po - Atelier de cartographie)",
   "the-project": "Le projet",
   "project": [
     "Delphine Lereculeur et Anne L’Hôte (conduite de projet, Sciences Po DRIS).",
@@ -55,10 +57,10 @@
   "antoine-rio-bio":
     "Géographe de formation et spécialisé en systèmes d'information géographique, Antoine Rio s'est notamment élargit au traitement et à la visualisation de données depuis son arrivée à l'Atelier de cartographie de Sciences Po, en 2014.",
   "features": [
-    "Plus de 200 <b>visualisations</b>",
-    "Près de 300 <b>notions-clés</b> expliquées",
-    "Des articles <b>scientifiques</b> avec des références",
-    "Des visualisations adaptés aux <b>mobiles</b>",
-    "Des thèmes aux programmes de <b>l'enseignement</b>"
+    "Plus de 200 visualisations",
+    "Près de 300 notions-clés expliquées",
+    "Des articles scientifiques avec des références",
+    "Des visualisations adaptés aux mobiles",
+    "Des thèmes aux programmes de l'enseignement"
   ]
 }
